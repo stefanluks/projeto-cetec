@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEDUC / CETEC</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h3>Jogos</h3>
+    </header>
+    <main>
+        <aside>
+            <div class="aside-heading">
+                <span class="eyebrow">SEDUC / CETEC</span>
+                <h1>Painel do jogo</h1>
+                <p>Escolha um minigame na lista para consultar seus detalhes e controles.</p>
+            </div>
+            <div id="game-info" class="game-info">
+                <span class="eyebrow">SOBRE A PLATAFORMA</span>
+                <h2>Arcade CETEC</h2>
+                <p>Escolha um dos desafios acima, leia as instruções e jogue diretamente nesta página.</p>
+            </div>
+        </aside>
+        <section id="jogos">
+            <div class="section-heading">
+                <span class="eyebrow">ARCADE CETEC</span>
+                <h2>Minigames</h2>
+                <p>Desafios rápidos para testar atenção, memória e velocidade.</p>
+            </div>
+            <div id="resumo-jogos" class="game-list"></div>
+        </section>
+        <section id="jogo-id">
+            <div id="game-stage" aria-live="polite">
+                <div class="empty-stage">
+                    <span class="stage-icon">?</span>
+                    <h2>Seu jogo aparece aqui</h2>
+                    <p>Escolha um desafio na lista para iniciar.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="games.app.js"></script>
+</body>
+</html>
