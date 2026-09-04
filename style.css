@@ -96,6 +96,11 @@ h2{font-size: clamp(1.5rem, 3vw, 2.1rem); color: #064d4d; margin: 7px 0;}
 .game-info p{font-size:.9rem; margin-top:8px;}
 .game-info ul{padding-left:18px; margin-top:10px; font-size:.88rem; line-height:1.6;}
 .game-controls{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; margin-bottom:12px;}
+.color-grid{display:grid; grid-template-columns:repeat(2, 82px); gap:12px; margin:12px auto 22px;}
+.color-button{width:82px; height:65px; border:4px solid rgba(255,255,255,.7); border-radius:10px; background:var(--color); cursor:pointer; opacity:.78; transition:transform .12s, opacity .12s, box-shadow .12s;}
+.color-button:hover,.color-button.lit{opacity:1; transform:scale(1.08); box-shadow:0 0 0 4px #f5e6b8, 0 0 20px var(--color);}
+.code-display{min-width:220px; margin:8px 0 18px; padding:15px 20px; border:2px dashed #026b6b; border-radius:8px; background:#e0f4f3; color:#064d4d; font:700 1.8rem monospace; letter-spacing:4px;}
+.code-input{display:block; margin:0 auto 14px; width:220px; text-transform:uppercase; font-family:monospace; letter-spacing:3px;}
 .puzzle-grid{display:grid; grid-template-columns:repeat(var(--puzzle-size), minmax(38px, 64px)); gap:6px; margin:10px auto 20px;}
 .puzzle-tile{aspect-ratio:1; border:2px solid #9bcccc; border-radius:6px; background:#42c2c2; color:#064d4d; font-size:clamp(.9rem, 3vw, 1.5rem); font-weight:bold; cursor:pointer;}
 .puzzle-tile.blank{background:#e0f4f3; border-style:dashed; color:transparent;}

@@ -3,7 +3,10 @@ const games = [
 	{ id: "invaders", title: "Space Invaders", description: "Defenda a nave e destrua a invasao alienigena.", icon: "02" },
 	{ id: "platform", title: "Plataforma", description: "Pule entre plataformas e alcance a bandeira.", icon: "03" },
 	{ id: "memory", title: "Jogo da memoria", description: "Encontre todos os pares escondidos.", icon: "04" },
-	{ id: "puzzle", title: "Quebra-cabeca", description: "Organize as pecas na ordem de 1 a 15.", icon: "05" }
+	{ id: "puzzle", title: "Quebra-cabeca", description: "Organize as pecas na ordem de 1 a 15.", icon: "05" },
+	{ id: "colors", title: "Ordem de cores", description: "Memorize e repita sequencias cada vez maiores.", icon: "06" },
+	{ id: "meteor", title: "Chuva de meteoros", description: "Pilote entre meteoros e sobreviva o maximo possivel.", icon: "07" },
+	{ id: "code", title: "Codigo relampago", description: "Digite os codigos antes que o tempo termine.", icon: "08" }
 ];
 
 const summaries = document.querySelector("#resumo-jogos");
@@ -16,7 +19,10 @@ const controls = {
 	invaders: ["Setas esquerda/direita: mover a nave", "Espaco ou clique: disparar", "Destrua a onda para liberar a proxima"],
 	platform: ["Setas esquerda/direita: andar", "Segure Espaco ou clique: pular", "Vença todas as fases e alcance a bandeira"],
 	memory: ["Clique em duas cartas para revelar um par", "Encontre todos os pares de emojis", "A dificuldade aumenta com mais cartas"],
-	puzzle: ["Escolha 3x3, 4x4 ou 5x5", "Clique em uma peca vizinha ao espaco vazio", "Organize os numeros na ordem correta"]
+	puzzle: ["Escolha 3x3, 4x4 ou 5x5", "Clique em uma peca vizinha ao espaco vazio", "Organize os numeros na ordem correta"],
+	colors: ["Observe a sequencia iluminada", "Clique nas cores na mesma ordem", "Cada rodada adiciona uma cor"],
+	meteor: ["Setas esquerda/direita: mover a nave", "Desvie dos meteoros", "A velocidade aumenta com o tempo"],
+	code: ["Digite o codigo mostrado", "Pressione Enter ou o botao Conferir", "Seja rapido para marcar pontos"]
 };
 
 function renderMenus() {
@@ -45,6 +51,9 @@ function startGame(id, container) {
 	if (id === "platform") setupPlatform(container);
 	if (id === "memory") setupMemory(container);
 	if (id === "puzzle") setupPuzzle(container);
+	if (id === "colors") setupColors(container);
+	if (id === "meteor") setupMeteor(container);
+	if (id === "code") setupCode(container);
 }
 
 function canvasGame(container, title, help) {
@@ -100,6 +109,35 @@ function setupMemory(container) {
 		if (opened[0].dataset.value === opened[1].dataset.value) { opened.forEach((item) => item.classList.add("matched")); opened = []; matched += 1; container.querySelector("#memory-result").textContent = matched === values.length / 2 ? "Parabens! Voce encontrou todos os emojis." : `Pares: ${matched} de ${values.length / 2}`; }
 		else { locked = true; setTimeout(() => { opened.forEach((item) => item.classList.remove("revealed")); opened = []; locked = false; }, 700); }
 	}));
+}
+
+function setupColors(container) {
+	const colors = [{ name: "Vermelho", value: "#b22222" }, { name: "Azul", value: "#176b9b" }, { name: "Amarelo", value: "#d49b16" }, { name: "Verde", value: "#238b58" }];
+	let sequence = []; let answer = []; let round = 0; let showing = false;
+	container.innerHTML = `<div class="game-stat" id="colors-status">Observe a primeira sequencia.</div><div class="color-grid">${colors.map((color, index) => `<button class="color-button" data-color="${index}" style="--color:${color.value}" aria-label="${color.name}"></button>`).join("")}</div><button class="game-button" id="colors-start">Comecar</button>`;
+	const status = container.querySelector("#colors-status"); const buttons = [...container.querySelectorAll(".color-button")]; const start = container.querySelector("#colors-start");
+	const flash = (index) => { buttons[index].classList.add("lit"); setTimeout(() => buttons[index].classList.remove("lit"), 350); };
+	const showSequence = () => { showing = true; status.textContent = `Rodada ${round}: memorize...`; sequence.forEach((value, index) => setTimeout(() => { flash(value); if (index === sequence.length - 1) { setTimeout(() => { showing = false; answer = []; status.textContent = "Agora repita a sequencia."; }, 450); } }, index * 650)); };
+	const begin = () => { sequence = [Math.floor(Math.random() * colors.length)]; round = 1; start.disabled = true; showSequence(); };
+	const nextRound = () => { round += 1; sequence.push(Math.floor(Math.random() * colors.length)); showSequence(); };
+	start.addEventListener("click", begin); buttons.forEach((button) => button.addEventListener("click", () => { if (showing || !sequence.length) return; const index = Number(button.dataset.color); flash(index); answer.push(index); const correct = answer.every((value, position) => value === sequence[position]); if (!correct) { status.textContent = `Errou na rodada ${round}. Clique em Comecar para tentar novamente.`; sequence = []; answer = []; round = 0; start.disabled = false; } else if (answer.length === sequence.length) { status.textContent = "Muito bem! Preparando a proxima rodada..."; setTimeout(nextRound, 650); } }));
+}
+
+function setupMeteor(container) {
+	const game = canvasGame(container, "Chuva de meteoros", "Use as setas esquerda e direita para pilotar. O campo fica mais rapido."); const { canvas, context, status } = game; let ship; let meteors; let frame; let score; let playing; let keys = {}; let last = 0;
+	const reset = () => { ship = { x: 350, y: 345 }; meteors = []; score = 0; playing = true; last = 0; status.textContent = "Sobreviva a chuva!"; cancelAnimationFrame(frame); frame = requestAnimationFrame(loop); };
+	const loop = (time) => { const delta = Math.min((time - last) / 16.67 || 1, 2); last = time; if (keys.ArrowLeft) ship.x -= 6 * delta; if (keys.ArrowRight) ship.x += 6 * delta; ship.x = Math.max(8, Math.min(684, ship.x)); if (Math.random() < .025 * delta) meteors.push({ x: Math.random() * 690, y: -35, size: 18 + Math.random() * 20, speed: 3 + score / 550 }); meteors.forEach((meteor) => meteor.y += meteor.speed * delta); meteors = meteors.filter((meteor) => meteor.y < 430); score += .1 * delta; const hit = meteors.some((meteor) => meteor.x < ship.x + 28 && meteor.x + meteor.size > ship.x && meteor.y < ship.y + 28 && meteor.y + meteor.size > ship.y); if (hit) { playing = false; status.textContent = `Nave atingida. Pontuacao: ${Math.floor(score)}. Pressione Enter para reiniciar.`; } drawMeteor(); if (playing) frame = requestAnimationFrame(loop); };
+	const drawMeteor = () => { context.fillStyle = "#17233c"; context.fillRect(0, 0, 720, 400); context.fillStyle = "#f5e6b8"; for (let index = 0; index < 35; index += 1) context.fillRect((index * 83) % 720, (index * 47) % 300, 2, 2); context.fillStyle = "#42c2c2"; context.fillRect(ship.x, ship.y, 28, 24); context.fillStyle = "#b22222"; meteors.forEach((meteor) => { context.beginPath(); context.arc(meteor.x, meteor.y, meteor.size / 2, 0, Math.PI * 2); context.fill(); }); context.fillStyle = "#fff"; context.font = "bold 20px Arial"; context.fillText(`Pontos: ${Math.floor(score)}`, 20, 30); };
+	window.addEventListener("keydown", (event) => { if (activeId !== "meteor") return; keys[event.code] = true; if (event.code === "Enter" && !playing) reset(); }); window.addEventListener("keyup", (event) => { keys[event.code] = false; }); canvas.addEventListener("click", () => { if (!playing) reset(); }); reset();
+}
+
+function setupCode(container) {
+	let code; let score = 0; let seconds = 12; let timer;
+	container.innerHTML = `<div class="code-display" id="code-display">Clique em Comecar</div><input class="game-input code-input" id="code-input" autocomplete="off" aria-label="Digite o codigo"><div class="game-controls"><button class="game-button" id="code-start">Comecar</button><button class="game-button" id="code-check">Conferir</button></div><div class="game-stat" id="code-status">Pontos: 0</div>`;
+	const display = container.querySelector("#code-display"); const input = container.querySelector("#code-input"); const status = container.querySelector("#code-status"); const start = container.querySelector("#code-start"); const check = container.querySelector("#code-check");
+	const newCode = () => { code = Array.from({ length: 5 }, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join(""); seconds = Math.max(4, 12 - Math.floor(score / 5)); display.textContent = code; input.value = ""; input.focus(); status.textContent = `Pontos: ${score} | Tempo: ${seconds}s`; clearInterval(timer); timer = setInterval(() => { seconds -= 1; status.textContent = `Pontos: ${score} | Tempo: ${seconds}s`; if (seconds <= 0) { clearInterval(timer); display.textContent = "Tempo esgotado"; status.textContent = `Fim de jogo! Pontos: ${score}`; } }, 1000); };
+	const verify = () => { if (!code || seconds <= 0) return; if (input.value.toUpperCase() === code) { score += 1; status.textContent = `Acertou! Pontos: ${score}`; newCode(); } else { status.textContent = `Codigo incorreto. Pontos: ${score}`; input.select(); } };
+	start.addEventListener("click", () => { score = 0; newCode(); }); check.addEventListener("click", verify); input.addEventListener("keydown", (event) => { if (event.key === "Enter") verify(); });
 }
 
 function setupPuzzle(container) {
