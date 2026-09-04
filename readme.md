@@ -5,7 +5,7 @@
 1. Clone o repositorio:
 
 ```bash
-git clone 
+git clone https://github.com/stefanluks/projeto-cetec.git
 ```
 2. Abra o arquivo `index.html`:
 
